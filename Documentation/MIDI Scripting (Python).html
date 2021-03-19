@@ -1,0 +1,4419 @@
+<!DOCTYPE html>
+<!-- saved from url=(0093)https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm -->
+<html lang="en"><link type="text/css" id="dark-mode" rel="stylesheet" href="chrome-extension://nlgphodeccebbcnkgmokeegopgpnjfkc/data/content_script/general/dark_1.css"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MIDI Scripting (Python)</title>
+</head><body class="vsc-initialized"><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="Keyword" value="MIDI Scripting">
+<param name="Keyword" value="Controller Scripting">
+</object>
+<link type="text/css" href="./MIDI Scripting (Python)_files/flstudio.css" rel="stylesheet">
+<script>
+  document.addEventListener('DOMContentLoaded', function(event) {
+    var leftFrame = document.getElementById('leftFrame');
+    var rightCol = document.getElementById('rightcol');
+    if (window.self !== window.top || window.location.href.indexOf("FL.chm") !== -1) {
+      rightCol.removeAttribute('id');
+      leftFrame.parentNode.parentNode.parentNode.parentNode.classList.add("fixed");
+	 leftFrame.parentNode.remove();
+    }
+    else if (window.location.href.indexOf("http") !== -1) {
+  	  leftFrame.setAttribute('src','../Index_Frame_Left.html');
+    }
+    else{
+  	  leftFrame.setAttribute('src','../index_frame_left_offline.html');
+    }
+  } );
+</script>
+
+
+<table class="container">
+<tbody><tr>
+
+<td id="rightcol">
+<p class="SubTopicOf">MIDI</p>
+<h1>MIDI Scripting Device API reference <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/app_feature.htm" class="link-img"><img src="./MIDI Scripting (Python)_files/global_onlyfledition.gif" width="25" title="This feature is available only in Fruity Edition and Producer Edition."></a></h1>
+<p><b>MIDI scripting</b> allows native <b>support for any MIDI controller</b>. Scripts are 'Python' code, stored in a plain text file, that FL Studio uses to translate commands between the controller and FL Studio. MIDI communication can go in both directions; The controller can access features in the FL Studio code (as listed below), and FL Studio can send data back to the controller (such as lighting pads or showing track names).
+</p><p>FL Studio MIDI <b>scripts are based on <a class="extLink" href="https://www.python.org/about/gettingstarted/" target="_blank">Python</a></b>. You do not need to install anything, FL Studio will handle scripts directly. When scripts are created in the folders shown below, the scripted device will display in the <b>Controller type</b> menu under the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_midi.htm">MIDI Settings</a> tab. From there, select the controller and use it as normal.
+</p><p><b>NOTES:</b>
+</p><ul>
+<li><b>Script hierarchy</b> - As FL Studio natively handles many MIDI functions and messages, this allows you to write <b>simple scripts</b> to handle specific cases or inputs and leave the rest to <b>FL Studio's generic MIDI support</b>. For example, you do not need to tell FL Studio what to do with MIDI notes. If the script doesn't specifically make changes to default behaviour, FL Studio will handle them as normal.
+</li><li><b>Scripts are complex</b> - With power and flexibility comes complexity. MIDI scripting is intended for <b>hardware manufacturers</b> and <b>advanced users</b> to create custom support for MIDI controllers. If you are new to programming, MIDI scripting will be confronting and confusing at first. This is normal, but patience and persistence will be rewarded! There are some simple examples to get started on our user forum listed below.
+</li></ul>
+<h4 id="script_userforum">Support Forum</h4>
+<p>FL Studio customers can access the <a class="extLink" href="https://support.image-line.com/redirect/midi_scripting_forum" target="_blank">MIDI Controller Scripting</a> forum to discuss scripting, share scripts, make feature requests and report issues.
+</p><h4 id="script_files">Script Locations and File Names</h4>
+<p>FL Studio will check the following locations for MIDI Scripts and related files:
+</p><ul>
+<li><b>Script files</b> - Scripted device files are located in the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_files.htm#userdata">User data folder</a> under <i>... Documents\Image-Line\FL Studio\Settings\Hardware\<b>devicename\device_devicename.py</b></i>.
+<ul>
+<li><b>Script folder naming</b> - The sub folder '<b>devicename</b>' is arbitrary and can be anything you like. Normally you would use the name of the MIDI hardware you are scripting for.
+</li><li><b>Script file naming</b> - The 'device_<b>devicename</b>' (bold part) can be anything you like to identify the MIDI script file. <b>NOTE:</b> 'device_<b>devicename</b>.py' is <b>mandatory</b> for the device to be processed by FL Studio. You can use spaces and capitals for <b>devicename</b> e.g. 'device_<b>My PHAT Controller</b>.py'.
+</li><li><b>The controller name</b> - Shown in the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_midi.htm">MIDI Settings</a> &gt; <b>Controller type</b> menu is defined on <b>first line</b> of 'device_devicename.py' script file, e.g. <b>#name=AKAI FL Studio Fire</b>. This will appear in the device list as '<b>AKAI FL Studio Fire (user)</b>'. The <b>(user)</b> suffix is to distinguish your device scripts from installed factory scripts.<br>The controller name is <b>required</b> and your script will be not recognized by FL Studio without it!
+</li><li><b><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_editing">Editing .py script files</a></b> - Use any text editor. If you are editing existing scripts, make a backup of the original files.
+</li></ul>
+</li><li><b>Device (launchmap) pages</b> (optional) - Files are located in <i>... Documents\Image-Line\FL Studio\Settings\Hardware\<b>devicename</b>\<b>Page(number).scr</b></i>. Device pages are special use-case and not normally used for standard MIDI controllers.
+<ul>
+<li><b>Launchmap files</b> - Launchmaps are custom files that provide diffent behaviour for a controller depending on what mode it is launched in. See the MIDI Controller reference post <a class="extLink" href="https://forum.image-line.com/viewtopic.php?f=1914&amp;t=92193" target="_blank">Custom controller layouts</a>. See also the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_launchpad">launchMapPages module</a>.
+</li></ul>
+</li><li><b>Custom modules</b> - You can include custom or external modules by placing them in the FL Studio installation, <b>shared libary folder</b>:
+<ul>
+<li><b><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/app_flstudioinstallationfiles.htm#windows_cleaninstall">Windows</a></b> - ... /Program Files (x86)/Image-Line/Shared/Python/<b>Lib</b>
+</li><li><b><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/app_flstudioinstallationfiles.htm#macos_install">macOS</a></b> - ... \Library\Application support\Image-line\Shared\Python\<b>Lib</b>
+</li></ul>
+</li></ul>
+<p><b>NOTE:</b> You do not need to install the Python compiler to edit and maintain these scripts, you can open and edit <b>.py files</b> with any text editor. FL Studio MIDI scripting is based on events <b>(Script events)</b> fired by FL Studio and responses <b>(Callbacks)</b> to these events.
+</p><h4 id="script_torials">Getting Started Tutorials</h4>
+<p><b>The basics of working with Script Files:</b>
+</p><p>To start from scratch, you need to create a script file, in the correct location in the FL Studio <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_files.htm#userdata">User data folder</a>. This section and video shows you how to do that, step-by-step.
+</p><ol>
+<li><b>Create a folder</b> - Using the file browser in your Operating System of choice, browse to your FL Studio <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_files.htm#userdata">User data folder</a>, usually '...Documents\Image-Line\FL Studio\Settings\Hardware\<b>YourScriptSubFolder</b>', where 'YourScriptSubFolder' is a sub folder you created for your script.
+</li><li><b>Create a script file</b> - In the 'YourScriptSubFolder' folder, create a plain text file '<b>device_YourScriptName.txt</b>'. Open the text file and add the following line of text, which will be the script name that appears in the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_midi.htm">MIDI Settings</a> &gt; <b>Controller type</b> list:
+<ul>
+<p> # name=My First Script
+</p></ul>
+</li><li><b>Change the file extension type to .py</b> - Change the file extension type from .txt to .py. To do this you must have file-type extensions activated in the browser on your computer. After that, just rename a plain text file 'device_ThisIsMyFistScript<b>.txt</b>' to 'device_ThisIsMyFistScript<b>.py</b>', for example. You can also use the operating system options to open files of type .py in the text editor of your choice.
+</li><li><b>Select your script in the MIDI Settings</b> - You will now see your script in the <b>MIDI Settings &gt; Controller type</b> list as <b>My First Script (user)</b>.
+</li><li><b>Edit the script</b> - Open this script in FL Studio from the <b>VIEW (menu) &gt; Script output &gt; Edit script (button)</b>
+</li><li>The following video shows steps 4 and 5 above.
+</li></ol>
+<p class="justImages"><iframe width="853" height="480" src="./MIDI Scripting (Python)_files/XJfXdztSfoM.html" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+</p><p><b>This video shows how to find MIDI data coming from a controller, to use in a script:</b>
+</p><p>After creating a script. You will probably want to identify data coming from your controller you want to link to a function in FL Studio, this video shows such an example.
+</p><p class="justImages"><iframe width="853" height="480" src="./MIDI Scripting (Python)_files/ASAfwcBhvGQ.html" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+</p><p><b>NOTE:</b> For the <b>Interpreter</b> tab to work you must select a script from the MIDI Settings &gt; Controller type option.
+</p><p>The script used in this tutorial is available <a class="extLink" href="https://forum.image-line.com/viewtopic.php?p=1483607#p1483607" target="_blank">here</a>.
+</p><h4 id="script_modules">Script Modules</h4>
+<p>Script functions (<b>callbacks</b>) are the instructions FL Studio will recognize and act upon in the Python code. Callbacks are organized in <b>modules</b> according to FL Studio target features (Playlist, Patterns, Device etc.). To use callbacks in script, you must load the callback module by including it at the top of the script with 'import':
+</p><ul>
+<li><b>import <i>module</i></b> (e.g. import playlist) - <b>NOTE:</b> Module names use <b>Lower <a class="extLink" href="https://en.wikipedia.org/wiki/Camel_case" target="_blank">Camel Case</a></b>. Available modules:
+<ul>
+<li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_playlist">playlist</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_channels">channels</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_mixer">mixer</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_patterns">patterns</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_arrangements">arrangement</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_ui">ui</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_transport">transport</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_device">device</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_plugin">plugins</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_general">general</a>
+</li><li><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_module_launchpad">launchMapPages</a>
+</li></ul>
+</li></ul>
+<h4 id="script_functions">Script Functions</h4>
+<p><b>Callbacks</b> are functions that execute features or act on components in FL Studio. You can for example, use a callback function to name an instrument Channel, move a Channel up/down or delete it. Or, more simply remap the transport buttons in FL Studio to your controller. In other words, <b>callbacks</b> give you deep control over FL Studio and how it operates. To use function in script use following syntax:
+</p><ul>
+<li><b>module.functionName(arguments)</b> - Where 'module' is module name. <b>NOTE:</b> Function names use <b>Lower Camel Case</b>.
+</li></ul>
+<h4 id="script_functions">Script Events</h4>
+<p>Script events are functions called by FL Studio, if script needs to respond to the event, add event function to script:
+</p><ul>
+<li><b>def eventName(arguments)</b> - Write response code inside this function. <b>NOTE:</b> Event names use <b>Camel Case</b>
+</li></ul>
+<h4 id="script_editing">Tools for Testing Functions and Editing Scripts</h4>
+<p>Open the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/menu_view.htm#script_output">VIEW menu &gt; Script output</a> window:
+</p><ul>
+<li><b>Interpreter</b> - This Tab allows you to enter and test Script commands to check they work as expected.
+</li><li><b>Script</b> - When a MIDI Script is selected in the MIDI Settings the <b>second tab</b> will show with the name of the device (in this case FL STUDIO FIRE). When there are <b>unhandled MIDI events</b>, the data will be displayed here. <b>NOTE:</b> The <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/envsettings_debug.htm">Debugging log tab</a> also shows ALL incoming MIDI data.
+<p><img class="justImages" src="./MIDI Scripting (Python)_files/midiscripting_viewoutput_script.png" width="600">
+</p><p><b>NOTE:</b> If your script loads and compiles correctly, you will see <b>init ok</b>, Initialization OK, in the Script window.
+</p><ul>
+<li><b>Clear output</b> - Clears the tabs data.
+</li><li><b>Edit script</b> - Open the current script in the system text editor to make changes.
+</li><li><b>Reload</b> - Apply the edited script so you don't need to restart FL Studio to test it.
+</li></ul></li></ul>
+<h2 id="script_events">Script events</h2>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th colspan="1" scope="row">Name</th>
+<th colspan="1" scope="row">Arguments</th>
+<th colspan="1" scope="row">Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>OnInit</td>
+<td>-</td>
+<td>Called when the script has been started.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnDeInit</td>
+<td>-</td>
+<td>Called before the script will be stopped.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnMidiIn</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>
+Called first when a MIDI message is received. Set the event's handled property to
+True if you don't want further processing.<br>
+(only raw data is included here: handled, timestamp, status, data1, data2, port,
+sysex, <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#pmeFlags">pmeflags</a>)<br>
+use this event for filtering, use OnMidiMsg event for actual processing ...
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnMidiMsg</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for all MIDI messages that were not handled by OnMidiIn.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnSysEx</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for note sysex messages that were not handled by OnMidiIn.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnNoteOn</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for note on messages that were not handled by OnMidiMsg.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnNoteOff</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for note off messages that were not handled by OnMidiMsg.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnControlChange</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for CC messages that were not handled by OnMidiMsg.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnProgramChange</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for program change messages that were not handled by OnMidiMsg.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnPitchBend</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for pitch bend change messages that were not handled by OnMidiMsg.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnKeyPressure</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for key pressure messages that were not handled by OnMidiMsg.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnChannelPressure</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for channel pressure messages that were not handled by OnMidiMsg.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnMidiOutMsg</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>Called for short MIDI out messages sent from MIDI Out plugin.<br>
+(event properties are limited to: handled, status, data1, data2, port, midiId,
+midiChan, midiChanEx)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnIdle</td>
+<td>-</td>
+<td>Called from time to time. Can be used to do some small tasks, mostly UI related.
+For example: update activity meters.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnRefresh</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#OnRefreshFlags">flags</a>
+</td>
+<td>Called when something changed that the script might want to respond to.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnDoFullRefresh</td>
+<td>-</td>
+<td>Same as OnRefresh, but everything should be updated.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnUpdateBeatIndicator</td>
+<td>long value</td>
+<td>Called when the beat indicator has changes.<br>
+"value" can be off = 0, bar = 1 (on), beat = 2 (on)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnDisplayZone</td>
+<td>-</td>
+<td>Called when playlist zone changed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnUpdateLiveMode</td>
+<td>long lastTrack</td>
+<td>Called when something about performance mode has changed.</td>
+ <td>1</td>
+</tr>
+<tr>
+<td>OnDirtyMixerTrack</td>
+<td>long index</td>
+<td>Called on mixer track(s) change, 'index' indicates track index of track that changed or -1 when all tracks changed<br>
+collect info about 'dirty' tracks here but do not handle track(s) refresh, wait for OnRefresh event with HW_Dirty_Mixer_Controls flag</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnUpdateMeters</td>
+<td>-</td>
+<td>Called when peak meters needs to be updated<br>
+call device.setHasMeters() in onInit to use this event!
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnWaitingForInput</td>
+<td>-</td>
+<td>
+Called when FL Studio is set in <a href="https://www.image-line.com/support/flstudio_online_manual/html/toolbar_panels.htm#panel_shortcuticons_wait" target="_blank">waiting mode</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OnSendTempMsg</td>
+<td>string message, long duration</td>
+<td>Called when hint message (to be displayed on controller display) is sent to the
+controller<br>
+duration of message is in ms</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h2 id="script_modules">Modules and functions</h2>
+<p><a id="script_module_playlist"></a></p>
+<h3>Playlist module</h3>
+<p>Playlist module allows you to control FL Studio <a href="https://www.image-line.com/support/flstudio_online_manual/html/playlist.htm">Playlist</a></p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>trackCount</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the current track count.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackName</td>
+<td>long index</td>
+<td>string</td>
+<td>Returns the name of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTrackName</td>
+<td>long index, string name</td>
+<td>-</td>
+<td>Changes the name of the track at "index" to "name".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackColor</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns the color of the track at "index" as an RGBA value.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTrackColor</td>
+<td>long index, long color</td>
+<td>-</td>
+<td>Changes the color of the track at "index" to the value of "color".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackMuted</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the track at "index" is muted.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>muteTrack</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggles the mute status of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackMuteLock</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the mute for track at "index" is locked.</td>
+<td>2</td>
+</tr>
+<tr>
+<td>muteTrackLock</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggles the mute lock status of the track at "index".</td>
+<td>2</td>
+</tr>
+<tr>
+<td>isTrackSolo</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the track at "index" is currently solo'd.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>soloTrack</td>
+<td>
+long index, (long value = -1), (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#trackSoloMode">mode</a> = [])
+</td>
+<td>-</td>
+<td>without value this function will toggle the solo state of the track at "index".<br>
+set optional 'value' to 1 to solo track or to 0 unsolo track<br></td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackActivityLevel</td>
+<td>long index</td>
+<td>float</td>
+<td>Returns the activity level of the track at "index" (zero if not active, &gt; 0 if active).</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackActivityLevelVis</td>
+<td>long index</td>
+<td>float</td>
+<td>Returns the visual activity level of the track at "index" as a normalized value.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getDisplayZone</td>
+<td>-</td>
+<td>long</td>
+<td>Returns current display zone in the playlist or zero if none.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>lockDisplayZone</td>
+<td>long index, long value</td>
+<td>-</td>
+<td>Lock display zone at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>liveDisplayZone</td>
+<td>long left, long top, long right, long bottom, (long duration = 0)</td>
+<td>-</td>
+<td>Set the display zone in the playlist to the specified co-ordinates.<br>
+use optional 'duration' parameter to make display zone temporary</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLiveLoopMode</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getLiveLoopModeResult">index</a>
+</td>
+<td>long</td>
+<td>Get live loop mode.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLiveTriggerMode</td>
+<td>long index</td>
+<td>long</td>
+<td>
+Get live trigger mode.<br>
+Result is one of the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getLiveTriggerModeResult">constants</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLivePosSnap</td>
+<td>long index</td>
+<td>long</td>
+<td>
+Get live pos snap.<br>
+Result is one of the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getLiveSnapResult">constants</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLiveTrigSnap</td>
+<td>long index</td>
+<td>long</td>
+<td>
+Get live trig snap.<br>
+Result is one of the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getLiveSnapResult">constants</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLiveStatus</td>
+<td>
+long index, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getLiveStatusMode">mode</a> = LB_Status_Default)
+</td>
+<td>long</td>
+<td>Get live status for track at "index".<br>
+Result depends on mode.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLiveBlockStatus</td>
+<td>
+long index, long blockNum, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getLiveStatusMode">mode</a> =
+LB_Status_Default)
+</td>
+<td>long</td>
+<td>Get live block status for track at "index" and for block "blockNum"<br>
+Result depends on mode.<br></td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLiveBlockColor</td>
+<td>long index, long blockNum</td>
+<td>long</td>
+<td>Get live block color for track at "index" and for block "blockNum"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>triggerLiveClip</td>
+<td>
+long index, long subNum, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#triggerLiveClipFlags">flags</a>, (float
+velocity = -1)
+</td>
+<td>-</td>
+<td>Trigger live clip for track at "index" and for block "blockNum"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>refreshLiveClips</td>
+<td>long index, long value</td>
+<td>-</td>
+<td>Refresh live clips for track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>incLivePosSnap</td>
+<td>long index, long value</td>
+<td>-</td>
+<td>Increase live pos snap for track at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>incLiveTrigSnap</td>
+<td>long index, long value</td>
+<td>-</td>
+<td>Increase live trig snap for track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>incLiveLoopMode</td>
+<td>long index, long value</td>
+<td>-</td>
+<td>Increase live loop mode for track at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>incLiveTrigMode</td>
+<td>long index, long value</td>
+<td>-</td>
+<td>Increase live trig mode for track at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getVisTimeBar</td>
+<td>-</td>
+<td>long</td>
+<td>Get time bar.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getVisTimeTick</td>
+<td>-</td>
+<td>long</td>
+<td>Get time tick.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getVisTimeStep</td>
+<td>-</td>
+<td>long</td>
+<td>Get time step.</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_channels">Channels module</h3>
+<p>Channels module allows you to control FL Studio <a href="https://www.image-line.com/support/flstudio_online_manual/html/channelrack.htm">Channels</a></p>
+<p>'index' is respecting channel groups, 'indexGlobal' is global index</p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>channelNumber</td>
+<td>(long canBeNone = 0), (long offset = 0)</td>
+<td>long</td>
+<td>Returns 'indexGlobal' of the first selected channel.<br>
+When there is no selection, function will return -1 (or 0 if canBeNone is 1).<br>
+Use optional 'offset' parameter to find other selected channels
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>channelCount</td>
+<td> (long mode* = 0) </td>
+<td>long</td>
+<td>Returns the number of channels respecting groups.<br>
+set optional mode* parameter to 1 to get count of all channels</td>
+<td>1, *3</td>
+</tr>
+<tr>
+<td>getChannelName</td>
+<td>long index</td>
+<td>string</td>
+<td>Returns the name of the channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setChannelName</td>
+<td>long index, string name</td>
+<td>-</td>
+<td>Changes the name of the channel at "index" to "name".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getChannelColor</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns the color of the channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setChannelColor</td>
+<td>long index, long color</td>
+<td>-</td>
+<td>Changes the color of the channel at "index" to the value of "color".</td>
+<td>1</td>
+</tr>
+<tr>
+ <td>isChannelMuted</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the channel at "index" is muted.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>muteChannel</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggles the muted state of the channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isChannelSolo</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the channel at "index" is soloed.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>soloChannel</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggles the solo state of the channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getChannelVolume</td>
+<td>long index</td>
+<td>float</td>
+<td>Returns the normalized volume (between 0 and 1.0) of the channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setChannelVolume</td>
+<td>long index, float volume</td>
+<td>-</td>
+<td>Changes the volume for the channel at "index".<br>
+volume is a value between 0 and 1.0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getChannelPan</td>
+<td>long index</td>
+<td>float</td>
+<td>Returns the pan value for the channel at "index", as a value between -1.0 and
++1.0.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setChannelPan</td>
+<td>long index, float pan</td>
+<td>-</td>
+<td>Change the pan value of the channel at "index" to the value of "pan".<br>
+The value should be between -1.0 and +1.0.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getChannelPitch</td>
+<td>long index, (long mode = 0)</td>
+<td>float/long</td>
+<td>Returns the pitch value for the channel at "index", as a value between -1.0 and +1.0.<br>
+use optional mode parameter to return pitch in semitones (mode = 1) or to return pitch range (mode = 2)
+</td>
+<td>8</td>
+</tr>
+<tr>
+<td>setChannelPitch</td>
+<td>long index, float value, (long mode = 0)</td>
+<td>-</td>
+<td>Change the pitch value of the channel at "index".<br>
+The value should be between -1.0 and +1.0.<br>
+use optional mode parameter to send value in semitones (mode = 1) or to change pitch range (mode = 2)
+</td>
+<td>8</td>
+</tr>
+<tr>
+<td>isChannelSelected</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the channel at "index" is selected.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>selectOneChannel</td>
+<td>long index</td>
+<td>-</td>
+<td>Select channel at "index" exclusively.</td>
+<td>8</td>
+</tr>
+<tr>
+<td>selectChannel</td>
+<td>long index, (long value = -1)</td>
+<td>-</td>
+<td>Toggle the selection of the channel at "index".<br>
+to not toggle, set value to 1 (select) or 0 (deselect)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>selectedChannel</td>
+<td>(long canBeNone = 0), (long offset = 0), (long indexGlobal = 0)</td>
+<td>long</td>
+<td>Returns 'index' of the first selected channel (respecting groups).<br>
+When there is no selection, function will return -1 (or 0 if canBeNone is 1).<br>
+Use optional 'offset' parameter to find other selected channels<br>
+Set optional 'indexGlobal' to 1 to return global channel index instead of index respecting groups<br>
+</td>
+<td>5</td>
+</tr>
+<tr>
+<td>selectAll</td>
+<td>-</td>
+<td>-</td>
+<td>Select all channels in the current channel group.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>deselectAll</td>
+<td>-</td>
+<td>-</td>
+<td>Deselect all channels in the current channel group.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getChannelMidiInPort</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns MIDI port for channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getChannelIndex</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns 'indexGlobal' for channel at "index" (respecting the groups).</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTargetFxTrack</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns target FX track for channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isHighLighted</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when red highlight rectangle is active in channel rack.</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"><i>Channel recording events:</i></td>
+</tr>
+<tr>
+<td>processRECEvent</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#RecEventParams">eventId</a>, long value, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#RecEventFlags">flags</a>
+</td>
+<td>long</td>
+<td>Process recording event.<br>
+value: min = 0, max = midi.FromMIDI_Max</td>
+<td>1, 7(deprecated here, moved to general module)</td>
+</tr>
+<tr>
+<td>incEventValue</td>
+<td>long eventId, long step, double res</td>
+<td>long</td>
+<td>Increase recording event value.</td>
+<td>1</td>
+</tr>
+<tr>
+<td id="getRecEventId">getRecEventId</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns rec event for channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"><i>Channel grid bits:</i></td>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>getGridBit</td>
+<td>long index, long position</td>
+<td>long</td>
+<td>Returns grid bit at "position" for channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setGridBit</td>
+<td>long index, long position, long value</td>
+<td>-</td>
+<td>Set grid bit value at "position" for channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getStepParam</td>
+<td>
+long step, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#stepParams">param</a>, long ofset, long startPos, (long
+padsStride = 16)
+</td>
+<td>long</td>
+<td>Get step parameter for step at "step"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getCurrentStepParam</td>
+<td>
+long index, long step, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#stepParams">param</a>
+</td>
+<td>-</td>
+<td>Get current step parameter for channel at "index" and for step at "step".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getGridBitWithLoop</td>
+<td>long index, long position</td>
+<td>-</td>
+<td>Get grid bit with loop for channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"><i>Misc.</i></td>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>showEditor</td>
+<td>long index, (long value* = -1)</td>
+<td>-</td>
+<td>Show editor (plugin window) for channel at "index".<br>
+set optional 'value'* to 1 to show or to 0 to hide editor</td>
+<td>1, *3</td>
+</tr>
+<tr>
+<td>focusEditor</td>
+<td>long index</td>
+<td>-</td>
+<td>Focus editor (plugin window) for channel at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>showCSForm</td>
+<td>long index, (long state* = 1)</td>
+<td>-</td>
+<td>Show channel settings (or plugin window for plugins) for channel at "index".<br>
+use optional state to 0 (close), 1 (open), -1 (toggle) channel settings window
+</td>
+<td>1, *9</td>
+</tr>
+<tr>
+<td>midiNoteOn</td>
+<td>long indexGlobal, long note, long velocity, (long channel = -1)</td>
+<td>-</td>
+<td>Set MIDI note for channel at "indexGlobal".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getActivityLevel</td>
+<td>long index</td>
+<td>float</td>
+<td>Returns activity level for channel at "index".</td>
+<td>9</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_mixer">Mixer module</h3>
+<p>Mixer module allows you to control FL Studio <a href="https://www.image-line.com/support/flstudio_online_manual/html/mixer.htm">Mixer</a>.
+<b>NOTE:</b> Track number 0 is always the <b>Master</b>.</p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>trackNumber</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the index of the currently selected mixer track.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackInfo</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#TrackInfomode">mode</a>
+</td>
+<td>long</td>
+<td>Returns track info.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTrackNumber</td>
+<td>
+long trackNumber, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#CurrentTrackFlags">flags</a> = [])
+</td>
+<td>-</td>
+<td>Sets the currently selected mixer track.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>trackCount</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the number of tracks.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackName</td>
+<td>long index, (long maxLen = -1)</td>
+<td>string</td>
+<td>Returns the name of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTrackName</td>
+<td>long index, string name</td>
+<td>-</td>
+<td>Changes the name of the track at "index" to "name".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackColor</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns the color of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTrackColor</td>
+<td>long index, long color</td>
+<td>-</td>
+<td>Changes the color of the track at "index" to "color".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackArmed</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the track at "index" is armed.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>armTrack</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggle the armed state of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackSolo</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the track at "index" is soloed.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>soloTrack</td>
+<td>
+long index, (long value = -1), (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#trackSoloMode">mode</a> = [])
+</td>
+<td>-</td>
+<td>without value this function will toggle the solo state of the track at "index".<br>
+set optional 'value' to 1 to solo track or to 0 unsolo track<br></td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackEnabled</td>
+<td>long index</td>
+<td>-</td>
+<td>Returns True if the track at "index" is enabled.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackAutomationEnabled</td>
+<td>long index, long plugIndex</td>
+<td>-</td>
+<td>Returns True if the track at "index" has automation enabled.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>enableTrack</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggle the enabled state of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackMuted</td>
+<td>long index</td>
+<td>-</td>
+<td>Returns True if the track at "index" is muted.</td>
+<td>2</td>
+</tr>
+<tr>
+<td>muteTrack</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggle mute state of the track at "index".</td>
+<td>2</td>
+</tr>
+<tr>
+<td id="getTrackPluginId">getTrackPluginId</td>
+<td>long index, long plugIndex</td>
+<td>long</td>
+<td>Returns plugin id of plugin with plugIndex on the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackPluginValid</td>
+<td>long index, long plugIndex</td>
+<td>long</td>
+<td>Returns True if plugin with plugIndex on the track at "index". is valid</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackVolume</td>
+<td>long index</td>
+<td>float</td>
+<td>Returns the normalized volume (between 0 and 1.0) of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTrackVolume</td>
+<td>long index, float volume</td>
+<td>-</td>
+<td>Changes the volume of the track at "index".<br>
+volume is value between 0 and 1.0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackPan</td>
+<td>long index</td>
+<td>float</td>
+<td>Returns the pan value (between -1.0 and 1.0) for the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTrackPan</td>
+<td>long index, float pan</td>
+<td>-</td>
+<td>Changes the panning for the track at "index". "pan"<br>
+pan value is between -1.0 and 1.0.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isTrackSelected</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the track at "index" is selected.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>selectTrack</td>
+<td>long index</td>
+<td>-</td>
+<td>Toggle selection of the track at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>selectAll</td>
+<td>-</td>
+<td>-</td>
+<td>Select all mixer tracks.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>deselectAll</td>
+<td>-</td>
+<td>-</td>
+<td>Deselect all mixer tracks.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setRouteTo</td>
+<td>long index, long destIndex, long value</td>
+ <td>-</td>
+<td>Set route for track at "index" to "destIndex".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getRouteSendActive</td>
+<td>long index, long destIndex</td>
+<td>long</td>
+<td>Returns True if route sends from track at "index" to "destIndex" is active.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>afterRoutingChanged</td>
+<td>-</td>
+<td>-</td>
+<td>Notify FL about routing changes.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getEventValue</td>
+<td>long index, (long value = MaxInt), (long smoothTarget = 1)</td>
+<td>long</td>
+<td>Returns event value from MIDI.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>remoteFindEventValue</td>
+<td>long index, (long flags = 0)</td>
+<td>float</td>
+<td>Returns event value.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getEventIDName</td>
+<td>long index, (long shortName = 0)</td>
+<td>-</td>
+<td>Returns event name (set shortName to True for short name).</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getEventIDValueString</td>
+<td>long index, long value</td>
+<td>string</td>
+<td>Returns event value as string.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getAutoSmoothEventValue</td>
+<td>long index, (long locked = 1)</td>
+<td>long</td>
+<td>Returns auto smooth event value.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>automateEvent</td>
+<td>
+long index, long value, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#RecEventFlags">flags</a>, (long speed = 0),
+(long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#IsIncrementFlags">isIncrement</a> = 0), (float res = EKRes)
+</td>
+<td>long</td>
+<td>Automate event</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackPeaks</td>
+<td>
+long index, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#TrackPeakMode">mode</a>
+</td>
+<td>float</td>
+<td>Returns peaks for track at "index"<br>
+returned value is between 0 (silence) and 1 (0db) or &lt; 1 (clipping)
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTrackRecordingFileName</td>
+<td>long index</td>
+<td>string</td>
+<td>Returns recording file name for track at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>linkTrackToChannel</td>
+<td>long mode</td>
+<td>-</td>
+<td>Link track to channel<br>
+"mode" can be one of the: ROUTE_ToThis = 0, ROUTE_StartingFromThis = 1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getSongStepPos</td>
+<td>-</td>
+<td>long</td>
+<td>Returns song step position.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getCurrentTempo</td>
+<td>(long asInt = 0)</td>
+<td>long/float</td>
+<td>Returns current tempo.<br>
+set optional "asInt" to True to get result as long</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getRecPPS</td>
+<td>-</td>
+<td>long</td>
+<td>Returns recording pps.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getSongTickPos</td>
+<td>
+(long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#SongTickPosFlags">mode</a> = ST_Int)
+</td>
+<td>long/float</td>
+<td>Returns song ticks pos.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLastPeakVol</td>
+<td>long section</td>
+<td>float</td>
+<td>Returns last peak volume. Set section to 0 for left volume or to 1 for right volume.</td>
+<td>9</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_patterns">Patterns module</h3>
+<p>Patterns module allows you to control FL Studio <a href="https://www.image-line.com/support/flstudio_online_manual/html/playlist_patterns.htm">Playlist
+Patterns</a></p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>patternNumber</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the current pattern number.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>patternCount</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the number of patterns.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>patternMax</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the maximum pattern number.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getPatternName</td>
+<td>long index</td>
+<td>string</td>
+<td>Returns the name of the pattern at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setPatternName</td>
+<td>long index, string name</td>
+<td>-</td>
+<td>Changes the name of the pattern at "index" to "name".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getPatternColor</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns the color of the pattern at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setPatternColor</td>
+<td>long index, long color</td>
+<td>-</td>
+<td>Changes the color of the pattern at "index" to "color".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getPatternLength</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns the length of the pattern at "index", in beats.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getBlockSetStatus</td>
+<td>long left, long top, long right, long bottom</td>
+<td>long</td>
+<td>
+Returns the status of the live block.<br>
+Result is one of the LB_Status_Simplest option <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getLiveBlockStatusModeSimplest">constants</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ensureValidNoteRecord</td>
+<td>long index, (long playNow = 0)</td>
+<td>-</td>
+<td>Ensure valid note of the pattern at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>jumpToPattern</td>
+<td>long index</td>
+<td>-</td>
+<td>Jum to the pattern at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>findFirstNextEmptyPat</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#findFirstNextEmptyPat">flags</a>, (long x = -1), (long y = -1)
+</td>
+<td>-</td>
+<td>Find first empty pattern at position x, y</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Picker panel functions:</i></td>
+</tr>
+<tr>
+<td>isPatternSelected</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if patterns at "index" is selected in Picker panel.</td>
+<td>2</td>
+</tr>
+<tr>
+<td>selectPattern</td>
+<td>long index, (long value = -1), (long preview = 0) </td>
+<td>-</td>
+<td>Select pattern at "index" in Picker panel.<br>
+value: -1 (toggle), 0 (deselect) 1 (select)<br>
+preview: set to 1 to preview pattern</td>
+<td>2</td>
+</tr>
+<tr>
+<td>selectAll</td>
+<td>-</td>
+<td>-</td>
+<td>Select all patterns in Picker panel.</td>
+<td>2</td>
+</tr>
+<tr>
+<td>deselectAll</td>
+<td>-</td>
+<td>-</td>
+<td>Deselect all patterns in Picker panel.</td>
+<td>2</td>
+</tr>
+<tr>
+<td>burnLoop</td>
+<td>long index, (long storeUndo = 1), (long updateUi = 1)</td>
+<td>-</td>
+<td>Returns activity level for channel at "index".<br>
+Set Optional storeUndo to 0 to not store undo step.<br>
+Set Optional updateUi to 0 to not update ui.<br>
+</td>
+<td>9</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_arrangements">Arrangement module</h3>
+<p>Arrangement module allows you to control FL Studio <a href="https://www.image-line.com/support/flstudio_online_manual/html/playlist.htm#arrangements">Playlist
+Arrangements</a></p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>jumpToMarker</td>
+<td>long index, long select</td>
+<td>-</td>
+<td>Select a marker.<br>
+set "index" to -1, to select the previous marker or to +1 to select the next
+marker.<br>
+set "select" to True to select marker as well.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getMarkerName</td>
+<td>long index</td>
+<td>string</td>
+<td>Returns the name of the requested marker.<br>
+If the marker doesn't exist, an empty string is returned.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>addAutoTimeMarker</td>
+<td>long time, string name</td>
+<td>-</td>
+<td>Add an automatic time marker at "time" with its name set to "name"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>liveSelection</td>
+<td>long time, long stop</td>
+<td>-</td>
+<td>Set a live selection point at "time".<br>
+set "stop" to True, to use end point of the selection (instead of start).</td>
+<td>1</td>
+</tr>
+<tr>
+<td>liveSelectionStart</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the start time of the current live selection.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>currentTime</td>
+<td>long snap</td>
+<td>long</td>
+<td>Returns the current time in the current arrangement.<br>
+set "snap" to True, to get returned value snapped to the grid.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>currentTimeHint</td>
+<td>long mode, long time, (long setRecPPB = ), (long isLength = 0)</td>
+<td>string</td>
+<td>Returns a hint string for the requested "time" in the current arrangement.<br>
+"mode" is 0 for pattern mode and 1 for song mode.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>selectionStart</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the start time of the current selection in the current arrangement.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>selectionEnd</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the end time of the current selection in the current arrangement.</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_ui">User interface module</h3>Unless otherwise specified, these
+functions returns how the request was <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#globalTransportFlags">handled</a>.
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>jog</td>
+<td>long value</td>
+<td>long</td>
+<td>Generic jog control. Can be used to select stuff. "value" is an increment.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>jog2</td>
+<td>long value</td>
+<td>long</td>
+<td>Alternate jog control. Can be used to relocate stuff. "value" is an increment.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>strip</td>
+<td>long value</td>
+<td>long</td>
+<td>Touch-sensitive strip. "value" is -midi.FromMIDI_Max (left most) to midi.FromMIDI_Max (right most).</td>
+<td>1</td>
+</tr>
+<tr>
+<td>stripJog</td>
+<td>long value</td>
+<td>long</td>
+<td>Touch-sensitive strip in jog mode. "value" is an increment.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>stripHold</td>
+<td>long value</td>
+<td>long</td>
+<td>Touch-sensitive strip in hold mode.<br>
+"value" is 0 for release, 1 and 2 for 1 or 2 fingers centered mode, -1 and -2 for 1 or
+2 fingers jog mode.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>previous</td>
+<td>-</td>
+<td>long</td>
+<td>Generic previous control.<br>
+in mixer: select previous mixer track<br>
+in channel rack: select previous channel<br>
+in browser: scroll to previous item<br>
+in plugin: select previous preset*
+</td>
+<td>1, *9</td>
+</tr>
+<tr>
+<td>next</td>
+<td>-</td>
+<td>long</td>
+<td>Generic next control.<br>
+in mixer: select next mixer track<br>
+in channel rack: select next channel<br>
+in browser: scroll to next item<br>
+in plugin: select next preset*
+</td>
+<td>1, *9</td>
+</tr>
+<tr>
+<td>moveJog</td>
+<td>long value</td>
+<td>long</td>
+<td>Used to relocate items. "value" is an increment.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>up</td>
+<td>(long value* = 1)</td>
+<td>long</td>
+<td>Generic way to move up.</td>
+<td>1, *4</td>
+</tr>
+<tr>
+<td>down</td>
+<td>(long value* = 1)</td>
+<td>long</td>
+<td>Generic way to move down.</td>
+<td>1, *4</td>
+</tr>
+<tr>
+<td>left</td>
+<td>(long value* = 1)</td>
+<td>long</td>
+<td>Generic way to move left.</td>
+<td>1, *4</td>
+</tr>
+<tr>
+<td>right</td>
+<td>(long value* = 1)</td>
+<td>long</td>
+<td>Generic way to move right.</td>
+<td>1, *4</td>
+</tr>
+<tr>
+<td>horZoom</td>
+<td>long value</td>
+<td>long</td>
+<td>Zoom horizontally by the increment "value".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>verZoom</td>
+<td>long value</td>
+<td>long</td>
+<td>Zoom vertically by the increment "value".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>snapOnOff</td>
+<td>-</td>
+<td>long</td>
+<td>Toggle the snap value.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>cut</td>
+<td>-</td>
+<td>long</td>
+<td>Cut what is selected, if possible.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>copy</td>
+<td>-</td>
+<td>long</td>
+<td>Copy what is selected, if possible.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>paste</td>
+<td>-</td>
+<td>long</td>
+<td>Paste previously copied data, if possible.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>insert</td>
+<td>-</td>
+<td>long</td>
+<td>Press the insert key.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>-</td>
+<td>long</td>
+<td>Press the delete key.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>enter</td>
+<td>-</td>
+<td>long</td>
+<td>Press the enter key.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>escape</td>
+<td>-</td>
+<td>long</td>
+<td>Press the escape key.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>yes</td>
+<td>-</td>
+<td>long</td>
+<td>Press the 'Y' key.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>not</td>
+<td>-</td>
+<td>long</td>
+<td>Press the 'N' key.</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>FL Studio Hints:</i></td>
+</tr>
+<tr>
+<td>getHintMsg</td>
+<td>-</td>
+<td>string</td>
+<td>Returns program hint message</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setHintMsg</td>
+<td>string msg</td>
+<td>-</td>
+<td>Set program hint message</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getHintValue</td>
+<td>long value, long max</td>
+<td>string</td>
+<td>Returns hint for value</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getTimeDispMin</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when time display is set to 'minutes'</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setTimeDispMin</td>
+<td>-</td>
+<td>-</td>
+<td>Set time display to minutes</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Window handling:</i></td>
+</tr>
+<tr>
+<td>getVisible</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>long</td>
+<td>
+Returns visible state (0 or 1) of window specified by <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>showWindow</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>-</td>
+<td>
+Show window specified by <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>hideWindow</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>-</td>
+<td>
+Hide window specified by <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>5</td>
+</tr>
+<tr>
+<td>getFocused</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>long</td>
+<td>
+Returns focused state (0 or 1) of window specified by <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setFocused</td>
+ <td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>-</td>
+<td>
+Set focused state (0 or 1) of window specified by <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#FLWindowConstants">index</a>
+</td>
+<td>2</td>
+</tr>
+<tr>
+<td>getFocusedFormCaption</td>
+<td>-</td>
+<td>string</td>
+<td>Returns caption of focused window</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getFocusedPluginName</td>
+<td>-</td>
+<td>string</td>
+<td>Returns Original Plugin Name of focused window</td>
+<td>5</td>
+</tr>
+<tr>
+<td>nextWindow</td>
+<td>-</td>
+<td>long</td>
+<td>Focus the next window.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>selectWindow</td>
+<td>long shift</td>
+<td>long</td>
+<td>Press the TAB key.<br>
+set "shift" to True, to make it act as if Shift + TAB is pressed.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>launchAudioEditor</td>
+<td>long reuse, string filename, long index, string preset, string presetGUID</td>
+<td>long</td>
+<td>Launch audio editor for track at "index" and returns editor state<br>
+set "reuse" to True to reuse opened audio editor (if any)<br>
+"filename" is path to audio file<br></td>
+<td>1</td>
+</tr>
+<tr>
+<td>openEventEditor</td>
+<td>long eventId, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#openEventEditorMode">mode</a>, (long newWindow = 0)</td>
+<td>long</td>
+<td>Launch event editor for "eventId"<br>
+example: openEventEditor(channels.getRecEventId(0) + midi.REC_Chan_PianoRoll, midi.EE_PR) to open piano roll for channel 0
+</td>
+<td>9</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Menu handling:</i></td>
+</tr>
+<tr>
+<td>isInPopupMenu</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when application popup menu is active</td>
+<td>1</td>
+</tr>
+<tr>
+<td>closeActivePopupMenu</td>
+<td>-</td>
+<td>-</td>
+<td>Close active popup menu</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Helpers:</i></td>
+</tr>
+<tr>
+<td>isClosing</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True if application is closing</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isMetronomeEnabled</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when metronome is enabled.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isStartOnInputEnabled</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when start on input is enabled.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isPrecountEnabled</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when precount is enabled.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isLoopRecEnabled</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when loop recording is enabled.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getSnapMode</td>
+<td>long value</td>
+<td>long</td>
+<td>Returns snap mode.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>snapMode</td>
+<td>long value</td>
+<td>long</td>
+<td>Select another snap mode.<br>
+"value" is an increment: -1 (previous), 1 (next) mode.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getProgTitle</td>
+<td>-</td>
+<td>string</td>
+<td>Returns program title</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getVersion</td>
+<td>(long mode = 4)*</td>
+<td>string / long</td>
+<td>Returns program version string (or number)<br>
+optional mode parameter can be one of the following: VER_Major = 0; VER_Minor = 1; VER_Release = 2; VER_Build = 3; VER_VersionAnEdition = 4; VER_FullVersionAnEdition = 5;
+</td>
+<td>1, *7</td>
+</tr>
+<tr>
+<td>crDisplayRect</td>
+<td>long left, long top, long right, long bottom, long duration</td>
+<td>-</td>
+<td>Display channel rack selection rectangle.</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_transport">Transport module</h3>
+<p>This module handles FL Studio Transport (Play, Stop, Pause &amp; Record)</p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>globalTransport</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#globalTransportCommands">command</a>, long value, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#pmeFlags">pmeflags</a> = PME_System), (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#globalTransportFlags">flags</a> = GT_ALL)
+</td>
+<td>long</td>
+<td>
+Call the GlobalTransport function with the appropriate parameters.<br>
+Use this function inside one of the <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a> script
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#script_events">events</a> and pass eventData.pmeflags as "pmeflags"
+parameter<br>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>start</td>
+<td>-</td>
+<td>-</td>
+<td>Start playback.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>stop</td>
+<td>-</td>
+<td>-</td>
+<td>Stop playback.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>record</td>
+<td>-</td>
+<td>-</td>
+<td>Toggle recording.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isRecording</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when recording is active.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLoopMode</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the current looping mode (pattern = 0, song = 1).</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setLoopMode</td>
+<td>-</td>
+<td>-</td>
+<td>Toggle loop mode.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getSongPos</td>
+<td>(long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getSongLengthMode">mode</a>* = -1)</td>
+<td>float</td>
+<td>Returns the song position as a normalized value (0..1).<br>
+or in specified format when mode* is set
+</td>
+<td>1, *3</td>
+</tr>
+<tr>
+<td>setSongPos</td>
+<td>float position, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getSongLengthMode">mode</a>* = -1)</td>
+<td>-</td>
+<td>Set the song position.<br>
+"position" is a normalized value (0..1).<br>
+or in specified format when mode* is set</td>
+<td>1, *4</td>
+</tr>
+<tr>
+<td>getSongLength</td>
+<td>long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getSongLengthMode">mode</a></td>
+<td>-</td>
+<td>Get the song length.</td>
+<td>3</td>
+</tr>
+<tr>
+<td>getSongPosHint</td>
+<td>-</td>
+<td>string</td>
+<td>Returns a hint for the current song position.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>isPlaying</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True if the program is playing.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>markerJumpJog</td>
+<td>
+long value, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#globalTransportFlags">flags</a> = GT_All)
+</td>
+<td>-</td>
+<td>Jump to a marker position.<br>
+"value" is an increment.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>markerSelJog</td>
+<td>
+long value, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#globalTransportFlags">flags</a> = GT_All)
+</td>
+<td>-</td>
+<td>Select a marker.<br>
+"value" is an increment.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getHWBeatLEDState</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the state of the hardware LED beat indicator.</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5" id="playbackSpeedControl"><i>Playback speed control:</i></td>
+</tr>
+<tr>
+<td>rewind</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#startStopConst">startStop</a>, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#globalTransportFlags">flags</a> = GT_All)
+</td>
+<td>-</td>
+<td>Rewind the song position.<br>
+Each call to this function with startStop = SS_Start, must be stopped with startStop = SS_Stop</td>
+<td>1</td>
+</tr>
+<tr>
+<td>fastForward</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#startStopConst">startStop</a>, (long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#globalTransportFlags">flags</a> = GT_All)
+</td>
+<td>-</td>
+<td>Forward the song position.<br>
+Each call to this function with startStop = SS_Start, must be stopped with startStop = SS_Stop</td>
+<td>1</td>
+</tr>
+<tr>
+<td>continuousMove</td>
+<td>
+long speed, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#startStopConst">startStop</a>
+</td>
+<td>-</td>
+<td>Start Continuous move.<br>
+This function do same as rewind and fastforward but you can control speed. <br>
+Set speed (&gt; 0) to move forward and (&lt; 0) to move backward (speed
+= (1) is normal speed forward)<br>
+Each call to this function with startStop = SS_Start, must be stopped with startStop = SS_Stop</td>
+<td>1</td>
+</tr>
+<tr>
+<td>continuousMovePos</td>
+<td>long speed, long startStop</td>
+<td>-</td>
+<td>Start Continuous move.<br>
+Set speed (&gt; 0) to move forward and (&lt; 0) to move
+backward (speed = (1) is normal speed forward). <br>
+Set startStop to (2) to start and to
+(0) to stop</td>
+<td>2</td>
+</tr>
+<tr>
+<td>setPlaybackSpeed</td>
+<td>float speedMultiplier</td>
+<td>-</td>
+<td>Set a playback speed multiplier.<br>
+Set speedMultiplier = (1) is normal speed, set to
+value between (1/4 ... 1) for slower and between (1 ... 4) faster movement</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_device">Device module</h3>
+<p><b>Device module</b> will handle MIDI devices connected to the FL Studio MIDI interface.
+You send messages to output interface, retrieve linked control values... etc). MIDI
+scripts, assigned to an input interface, can be mapped (linked) to an Output interface via
+the Port Number. With mapped (linked) output interfaces, scripts can send midi messages to
+output interfaces by using one of the <b>midiOut***</b> messages.</p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>isAssigned</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True if (linked) output interface is assigned.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getPortNumber</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the interface port number. (or -1 when port number is not assigned)<br>
+this is same number as interface port number set in FL Studio Midi settings</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getName</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the device name</td>
+<td>7</td>
+</tr>
+<tr>
+<td>midiOutMsg</td>
+<td>long message</td>
+<td>-</td>
+<td>Send a MIDI message to the (linked) output interface.<br>
+"message" holds the value to be sent, with the channel and command in the lower byte
+and the first and second data values in the next two bytes.</td>
+<td>1</td>
+</tr>
+<tr>
+<td></td>
+<td>long midiId, long channel, long data1, long data2 </td>
+<td>-</td>
+<td>Send a MIDI message to the (linked) output interface (alternative version with separate parameters)</td>
+<td>2</td>
+</tr>
+<tr>
+<td>midiOutNewMsg</td>
+<td>long slotIndex, long message</td>
+<td>-</td>
+<td>Send a MIDI message to the (linked) output interface, but only if the value has
+changed.<br>
+"slotIndex" is a value chosen by the caller, it should be the same as it was for the
+previous message that should be compared with.<br>
+"message" holds the value to be sent.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>midiOutSysex</td>
+<td>string message</td>
+<td>-</td>
+<td>Send a SYSEX message to the (linked) output interface.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>sendMsgGeneric (deprecated)</td>
+<td>int64 id, string message, string lastMsg, (long offset = 0)</td>
+<td>string</td>
+<td>Send a text string as a SYSEX message to the (linked) output interface.<br>
+"id" holds the first 6 bytes of the message (starting with 0xF0). The end value 0xF7 is
+added automatically.<br>
+"message" is the text to send<br>
+"lastMsg" is the string returned by the previous call to this function.<br>
+function returns updated lastMsg</td>
+<td>1</td>
+</tr>
+<tr>
+<td>processMIDICC</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>-</td>
+<td>Let FL process a CC message.<br>
+use this function inside OnMidiMsg and pass (modified) eventData object as function
+parameter</td>
+<td>1</td>
+</tr>
+<tr>
+<td>forwardMIDICC</td>
+<td>
+long message, (long mode = 1)
+</td>
+<td>-</td>
+<td>Forward CC message to plugin.<br>
+Use this function to forward midi cc messages to FL plugin(s).<br>
+Specify message as: message = status + (data1 &lt;&lt; 8) + (data2 &lt;&lt; 16) + (port &lt;&lt; 24)<br>
+Message will be forwarded to active (focused) plugin.<br>
+Use optional mode parameter to send message to selected channel (mode = 2) or to all plugins (0).<br>
+Remark: midi input port of plugin must be equal to port specified in message.
+</td>
+<td>7</td>
+</tr>
+<tr>
+<td>directFeedback</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>
+</td>
+<td>-</td>
+<td>Send a received message on to the (linked) output interface.<br>
+use this function inside OnMidiMsg and pass (modified) eventData object as function
+parameter</td>
+<td>1</td>
+</tr>
+<tr>
+<td>repeatMidiEvent</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>, (long delay = 300, long rate = 300)
+</td>
+<td>-</td>
+<td>Start repeatedly sending out the previously sent message.<br>
+It will be sent first after "delay" milliseconds, and afterwards every "rate"
+milliseconds.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>stopRepeatMidiEvent</td>
+<td>-</td>
+<td>-</td>
+<td>Stop repeating the message sent with repeatMidiEvent.</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Control events:</i></td>
+</tr>
+<tr>
+<td>findEventID</td>
+<td>long controlId, (long flags = [])</td>
+<td>long</td>
+<td>Returns eventID for controlId.<br>
+"flags" can be one of the: FEID_Flags_Skip_Unsafe = 1 (skip unsafe (using formula)
+links)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLinkedValue</td>
+<td>long eventID</td>
+<td>float</td>
+<td>Returns normalized value of the linked control via eventID<br>
+(to get control eventId, use findEventID function).<br>
+Result is -1 if there is no linked control.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getLinkedValueString</td>
+<td>long eventID</td>
+<td>string</td>
+<td>Returns text value of linked control via eventID<br>
+(to get control eventId, use findEventID function).<br>
+Result is ERR_PLUGINNOTVALID if there is no linked control.</td>
+<td>10</td>
+</tr>
+<tr>
+<td>getLinkedParamName</td>
+<td>long eventID</td>
+<td>string</td>
+<td>Returns parameter name of the control linked via eventID<br>
+(to get control eventId, use findEventID function).<br>
+Result is ERR_PLUGINNOTVALID if there is no linked control.</td>
+<td>10</td>
+</tr>
+<tr>
+<td>getLinkedInfo</td>
+<td>long eventID</td>
+<td>long</td>
+<td>
+Returns information about the linked control via eventID<br>
+(to get control eventId, use findEventID function).<br>
+Result is -1 if there is no linked control, otherwise result is one or more of the
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#LinkedInfoResultFlags">constants</a>
+</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Refresh thread:</i></td>
+</tr>
+<tr>
+<td>createRefreshThread</td>
+<td>-</td>
+<td>-</td>
+<td>Start a threaded refresh of the entire MIDI device.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>destroyRefreshThread</td>
+<td>-</td>
+<td>-</td>
+<td>Stop a previously started threaded refresh.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>fullRefresh</td>
+<td>-</td>
+<td>-</td>
+<td>Trigger a previously started threaded refresh.<br>
+If there is none, the refresh is triggered immediately.</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Helpers:</i></td>
+</tr>
+<tr>
+<td>isDoubleClick</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns True if the function was called with the same index shortly before,
+indicating a double click.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setHasMeters</td>
+<td>-</td>
+<td>-</td>
+<td>use this in OnInit event to tell FL Studio device use peak meters</td>
+<td>1</td>
+</tr>
+<tr>
+<td>baseTrackSelect</td>
+<td>long index, long step</td>
+<td>-</td>
+<td>Base track selection (for control surfaces). Set step to MaxInt for reset.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>hardwareRefreshMixerTrack</td>
+<td>long index</td>
+<td>-</td>
+<td>Hardware refresh mixer track at "index", use -1 to refresh all</td>
+<td>1</td>
+</tr>
+<tr>
+<td colspan="5"></td>
+</tr>
+<tr>
+<td colspan="5"><i>Dispatching between devices:</i></td>
+</tr>
+<tr>
+<td>dispatch</td>
+<td>long ctrlIndex, long message, (bytes sysex)</td>
+<td>-</td>
+<td>Dispatch midi message (or sysex) to controller specified by ctrlIndex.<br>
+receiver (script) must define sender(s) inside script: # receiveFrom="Sender name"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>dispatchReceiverCount</td>
+<td>-</td>
+<td>long</td>
+<td>Returns number of available receivers.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>dispatchGetReceiverPortNumber</td>
+<td>long ctrlIndex</td>
+<td>long</td>
+<td>Returns port number of receiver specified by ctrlIndex.</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_plugin">Plugins module</h3>
+<p>This module handles FL Studio plugins (by their position in mixer or channel rack)<br>
+to access generator plugins (chanel rack), specify channel rack index, for effects specify mixer index and slotIndex
+</p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>isValid</td>
+<td>
+long index, (long slotIndex = -1)
+</td>
+<td>long</td>
+<td>Returns true if there is valid plugin at position of index/slotindex </td>
+<td>8</td>
+</tr>
+<tr>
+<td>getPluginName</td>
+<td>
+long index, (long slotIndex = -1)
+</td>
+<td>string</td>
+<td>Returns plugin name for plugin at position of index/slotindex </td>
+<td>8</td>
+</tr>
+<tr>
+<td>getParamCount</td>
+<td>
+long index, (long slotIndex = -1)
+</td>
+<td>long</td>
+<td>Returns plugin parameter count for plugin at position of index/slotindex </td>
+<td>8</td>
+</tr>
+<tr>
+<td>getParamName</td>
+<td>
+long paramIndex, long index, (long slotIndex = -1)
+</td>
+<td>string</td>
+<td>Returns plugin parameter (paramIndex) name for plugin at position of index/slotindex </td>
+<td>8</td>
+</tr>
+<tr>
+<td>getParamValue</td>
+<td>
+long paramIndex, long index, (long slotIndex = -1)
+</td>
+<td>long</td>
+<td>Returns plugin parameter (paramIndex) value for plugin at position of index/slotindex as normalized value</td>
+<td>8</td>
+</tr>
+<tr>
+<td>setParamValue</td>
+<td>
+float value, long paramIndex, long index, (long slotIndex = -1)
+</td>
+<td>long</td>
+<td>Sets value (normalized) for plugin parameter (paramIndex) for plugin at position of index/slotindex</td>
+<td>8</td>
+</tr>
+<tr>
+<td>getParamValueString</td>
+<td>
+long paramIndex, long index, (long slotIndex = -1)
+</td>
+<td>string</td>
+<td>Returns plugin parameter (paramIndex) value as string for plugin at position of index/slotindex <br>
+this function is only supported by some of the plugins, support for more plugins will be added later
+</td>
+<td>8</td>
+</tr>
+<tr>
+<td>nextPreset</td>
+<td>
+long index, (long slotIndex = -1)
+</td>
+<td>-</td>
+<td>Navigate to next preset in plugin at position of index/slotindex</td>
+<td>10</td>
+</tr>
+<tr>
+<td>prevPreset</td>
+<td>
+long index, (long slotIndex = -1)
+</td>
+<td>-</td>
+<td>Navigate to previous preset in plugin at position of index/slotindex</td>
+<td>10</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_general">General module</h3>
+<p>This module handles general FL Studio functions</p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>saveUndo</td>
+<td>
+string undoName, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#saveUndoFlags">flags</a>, (long update = 1)
+</td>
+<td>-</td>
+<td>Saves undo history point</td>
+<td>1</td>
+</tr>
+<tr>
+<td>undo</td>
+<td>-</td>
+<td>long</td>
+<td>Undo</td>
+<td>1</td>
+</tr>
+<tr>
+<td>undoUp</td>
+<td>-</td>
+<td>long</td>
+<td>Move up in undo history</td>
+<td>1</td>
+</tr>
+<tr>
+<td>undoDown</td>
+<td>-</td>
+<td>long</td>
+<td>Move down in undo history</td>
+<td>4</td>
+</tr>
+<tr>
+<td>undoUpDown</td>
+<td>long value</td>
+<td>long</td>
+<td>[todo explanation]</td>
+<td>1</td>
+</tr>
+<tr>
+<td>restoreUndo</td>
+<td>-</td>
+<td>long</td>
+<td>[todo explanation]</td>
+<td>1</td>
+</tr>
+<tr>
+<td>restoreUndoLevel</td>
+<td>long level</td>
+<td>-</td>
+<td>[todo explanation]</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getUndoLevelHint</td>
+<td>-</td>
+<td>string</td>
+<td>Returns undo level hint</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getUndoHistoryPos</td>
+<td>-</td>
+<td>long</td>
+<td>Returns undo history position</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getUndoHistoryCount</td>
+<td>-</td>
+<td>long</td>
+<td>Returns undo history length</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getUndoHistoryLast</td>
+<td>-</td>
+<td>long</td>
+<td>Returns last undo history position</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setUndoHistoryPos</td>
+<td>long index</td>
+<td>-</td>
+<td>Set undo history position</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setUndoHistoryCount</td>
+ <td>long value</td>
+<td>-</td>
+<td>Set undo history count</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setUndoHistoryLast</td>
+<td>long index</td>
+<td>-</td>
+<td>Set undo history last position</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getRecPPB</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the current time signature value. (Timebase * Numerator)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getRecPPQ</td>
+<td>-</td>
+<td>long</td>
+<td>Returns the current timebase (PPQ)</td>
+<td>8</td>
+</tr>
+<tr>
+<td>getUseMetronome</td>
+<td>-</td>
+<td>long</td>
+<td>Returns True when metronome is used</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getPrecount</td>
+<td>-</td>
+<td>long</td>
+<td>Returns precount value</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getChangedFlag</td>
+<td>-</td>
+<td>long</td>
+<td>Get FL Studio project "changed' flag<br>
+Result is one of the: 0 = clean, 1 = dirty, 2 = dirty but clean for autosave</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getVersion</td>
+<td>-</td>
+<td>long</td>
+<td>Returns Midi scripting API version number</td>
+<td>1</td>
+</tr>
+<tr>
+<td>processRECEvent</td>
+<td>
+long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#RecEventParams">eventId</a>, long value, long <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#RecEventFlags">flags</a>
+</td>
+<td>long</td>
+<td>Process recording event.<br>
+value: min = 0, max = midi.FromMIDI_Max</td>
+<td>7</td>
+</tr>
+</tbody></table>
+<h3 id="script_module_launchpad">LaunchMapPages module</h3>
+<p>Some controllers support pages (custom controller layouts), this optional module helps
+to handle this pages.</p>
+<p>LaunchMapPages <a target="_blank" href="https://forum.image-line.com/viewtopic.php?f=1914&amp;t=92193">reference</a></p>
+<table class="tableList" style="width:98%">
+<tbody><tr>
+<th>Command</th>
+<th>Arguments</th>
+<th>Result</th>
+<th>Documentation</th>
+<th colspan="1" scope="row">Version</th>
+</tr>
+<tr>
+<td>init</td>
+<td>
+string <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#devicename">deviceName</a>, long width, long height
+</td>
+<td>-</td>
+<td>Initialize launchmap pages.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>createOverlayMap</td>
+<td>long offColor, long onColor, long width, long height</td>
+<td>-</td>
+<td>Creates overlay map.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>length</td>
+<td>-</td>
+<td>long</td>
+<td>Returns launchmap pages length.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>updateMap</td>
+<td>long index</td>
+<td>long</td>
+<td>Updates launchmap page at "index".</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getMapItemColor</td>
+<td>long index, long itemIndex</td>
+<td>long</td>
+<td>Returns color at "itemIndex" of page at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getMapCount</td>
+<td>long index</td>
+<td>long</td>
+<td>Returns length of items of page at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getMapItemChannel</td>
+<td>long index, long itemIndex</td>
+<td>long</td>
+<td>Returns destination channel at "itemIndex" of page at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>getMapItemAftertouch</td>
+<td>long index, long itemIndex</td>
+<td>long</td>
+<td>Returns aftertouch for item at "itemIndex" of page at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>processMapItem</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>, long index, long itemIndex, long velocity
+</td>
+<td>-</td>
+<td>Process map item at "itemIndex" of page at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>releaseMapItem</td>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#eventType">eventData</a>, long index
+</td>
+<td>-</td>
+<td>Release map item at "itemIndex" of page at "index"</td>
+<td>1</td>
+</tr>
+<tr>
+<td>checkMapForHiddenItem</td>
+<td>-</td>
+<td>-</td>
+<td>Checks for launchpad hidden item.</td>
+<td>1</td>
+</tr>
+<tr>
+<td>setMapItemTarget</td>
+<td>long index, long itemIndex, long target</td>
+<td>long</td>
+<td>Set target for item at "itemIndex" of page at "index".</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h2 id="script_module_datatypes">Types</h2>
+<h4 id="eventType">eventData</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>handled</td>
+<td>bool (r/w)</td>
+<td>set to True to stop event propagtion</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>time (r)</td>
+<td>timestamp of event</td>
+</tr>
+<tr>
+<td>status</td>
+<td>long (r/w)</td>
+<td>MIDI status</td>
+</tr>
+<tr>
+<td>data1</td>
+<td>long (r/w)</td>
+<td>MIDI data1</td>
+</tr>
+<tr>
+<td>data2</td>
+<td>long (r/w)</td>
+<td>MIDI data2</td>
+</tr>
+<tr>
+<td>port</td>
+<td>long (r)</td>
+<td>MIDI port</td>
+</tr>
+<tr>
+<td>note</td>
+<td>long (r/w)</td>
+<td>MIDI note number</td>
+</tr>
+<tr>
+<td>velocity</td>
+<td>long (r/w)</td>
+<td>MIDI velocity</td>
+</tr>
+<tr>
+<td>pressure</td>
+<td>long (r/w)</td>
+<td>MIDI pressure</td>
+</tr>
+<tr>
+<td>progNum</td>
+<td>long (r)</td>
+<td>MIDI program number</td>
+</tr>
+<tr>
+<td>controlNum</td>
+<td>long (r)</td>
+<td>MIDI control number</td>
+</tr>
+<tr>
+<td>controlVal</td>
+<td>long (r)</td>
+<td>MIDI control value</td>
+</tr>
+<tr>
+<td>pitchBend</td>
+<td>long (r)</td>
+<td>MIDI pitch bend value</td>
+</tr>
+<tr>
+<td>sysex</td>
+<td>bytes (r/w)</td>
+<td>MIDI sysex data</td>
+</tr>
+<tr>
+<td>isIncrement</td>
+<td>bool (r/w)</td>
+<td>MIDI is increament state</td>
+</tr>
+<tr>
+<td>res</td>
+<td>double (r/w)</td>
+<td>MIDI res</td>
+</tr>
+<tr>
+<td>inEv</td>
+<td>long (r/w)</td>
+<td>MIDI inEv</td>
+</tr>
+<tr>
+<td>outEv</td>
+<td>long (r/w)</td>
+<td>MIDI outEv</td>
+</tr>
+<tr>
+<td>midiId</td>
+<td>long (r/w)</td>
+<td>MIDI midiID</td>
+ </tr>
+<tr>
+<td>midiChan</td>
+<td>long (r/w)</td>
+<td>MIDI midiChan (0 based)</td>
+</tr>
+<tr>
+<td>midiChanEx</td>
+<td>long (r/w)</td>
+<td>MIDI midiChanEx</td>
+</tr>
+<tr>
+<td>
+<a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#pmeFlags">pmeflags</a>
+</td>
+<td>long (r)</td>
+<td>
+MIDI <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#pmeFlags">pmeflags</a>
+</td>
+</tr>
+</tbody></table>
+<h2 id="script_module_constants">Constants</h2>
+<p>All constants below are defined in module 'midi'. Include the MIDI module at the top of
+the script with 'import':</p>
+<ul>
+<li><b>import <i>midi</i></b></li>
+</ul>
+<h4 id="OnRefreshFlags">OnRefresh flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>HW_Dirty_Mixer_Sel</td>
+<td>1</td>
+<td>mixer selection changed</td>
+</tr>
+<tr>
+<td>HW_Dirty_Mixer_Display</td>
+<td>2</td>
+<td>mixer display changed</td>
+</tr>
+<tr>
+<td>HW_Dirty_Mixer_Controls</td>
+<td>4</td>
+<td>mixer controls changed</td>
+</tr>
+<tr>
+<td>HW_Dirty_RemoteLinks</td>
+<td>16</td>
+<td>remote links (linked controls) has been added/removed</td>
+</tr>
+<tr>
+<td>HW_Dirty_FocusedWindow</td>
+<td>32</td>
+<td>channel selection changed</td>
+</tr>
+<tr>
+<td>HW_Dirty_Performance</td>
+<td>64</td>
+<td>performance layout changed</td>
+</tr>
+<tr>
+<td>HW_Dirty_LEDs</td>
+<td>256</td>
+<td>various changes in FL which require update of controller leds<br>
+update status leds (play/stop/record/active window/.....) on this flag</td>
+</tr>
+<tr>
+<td>HW_Dirty_RemoteLinkValues</td>
+<td>512</td>
+<td>remote link (linked controls) value is changed</td>
+</tr>
+</tbody></table>
+<h4 id="getLiveStatusMode">Live status mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>LB_Status_Default</td>
+<td>0 (Default)</td>
+<td>Result will be one or more of: any filled = 1, any scheduled = 2, any playing =
+4</td>
+</tr>
+<tr>
+<td>LB_Status_Simple</td>
+<td>1</td>
+<td>Result will be one of the: empty = 0, filled = 1, none playing (or scheduled) = 2,
+none scheduled (and not playing) = 3</td>
+</tr>
+</tbody></table>
+<h4 id="getLiveBlockStatusMode">Live block status mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>LB_Status_Default</td>
+<td>0 (Default)</td>
+<td>Result will be one or more of: filled = 1, scheduled = 2, playing = 4</td>
+</tr>
+<tr>
+<td>LB_Status_Simple</td>
+<td>1</td>
+<td>Result will be one of the: empty = 0, filled = 1, playing (or scheduled) = 2,
+scheduled (and not playing) = 3</td>
+</tr>
+<tr>
+<td id="getLiveBlockStatusModeSimplest">LB_Status_Simplest</td>
+<td>2</td>
+<td>Result will be one of the: empty = 0, filled = 1, playing or scheduled = 2</td>
+</tr>
+</tbody></table>
+<h4 id="getLiveBlockStatusFlags">Live block status flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>LB_Status_Filled</td>
+<td>1</td>
+<td>Filled</td>
+</tr>
+<tr>
+<td>LB_Status_Scheduled</td>
+<td>2</td>
+<td>Scheduled</td>
+</tr>
+<tr>
+<td>LB_Status_Playing</td>
+<td>4</td>
+<td>Playing</td>
+</tr>
+</tbody></table>
+<h4 id="trackSoloMode">Track solor mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>fxSoloModeWithSourceTracks</td>
+<td>0</td>
+<td>Solo mixer track (include tracks routed to it)</td>
+</tr>
+<tr>
+<td>fxSoloModeWithDestTracks</td>
+<td>1</td>
+<td>Solo mixer track (include sends)</td>
+</tr>
+<tr>
+<td>fxSoloModeIgnorePrevious</td>
+<td>2</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+</tbody></table>
+<h4 id="getLiveLoopModeResult">Live loop mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>LiveLoop_Stay</td>
+<td>0</td>
+<td>Stay</td>
+</tr>
+<tr>
+<td>LiveLoop_OneShot</td>
+<td>1</td>
+<td>One shot</td>
+</tr>
+<tr>
+<td>LiveLoop_MarchWrap</td>
+<td>2</td>
+<td>March and wrap</td>
+</tr>
+<tr>
+<td>LiveLoop_MarchStay</td>
+<td>3</td>
+<td>March and stay</td>
+</tr>
+<tr>
+<td>LiveLoop_MarchStop</td>
+<td>4</td>
+<td>March and stop</td>
+</tr>
+<tr>
+<td>LiveLoop_Random</td>
+<td>5</td>
+<td>Random</td>
+</tr>
+<tr>
+<td>LiveLoop_ExRandom</td>
+<td>6</td>
+<td>Random (avoid previous)</td>
+</tr>
+</tbody></table>
+<h4 id="getLiveTriggerModeResult">Live trigger mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>LiveTrig_Retrigger</td>
+<td>0</td>
+<td>Retrigger</td>
+</tr>
+<tr>
+<td>LiveTrig_Hold</td>
+<td>1</td>
+<td>Hold and stop</td>
+</tr>
+<tr>
+<td>LiveTrig_HMotion</td>
+<td>2</td>
+<td>Hold and motion</td>
+</tr>
+<tr>
+<td>LiveTrig_Latch</td>
+<td>3</td>
+<td>Latch</td>
+</tr>
+</tbody></table>
+<h4 id="getLiveSnapResult">Live Snap</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>LiveSnap_Off</td>
+<td>0</td>
+<td>Off</td>
+</tr>
+<tr>
+<td>LiveSnap_Fourth</td>
+<td>1</td>
+<td>1/4 beat</td>
+</tr>
+<tr>
+<td>LiveSnap_Half</td>
+<td>2</td>
+<td>1/2 beat</td>
+</tr>
+<tr>
+<td>LiveSnap_One</td>
+<td>3</td>
+<td>1 beat</td>
+</tr>
+<tr>
+<td>LiveSnap_Two</td>
+<td>4</td>
+<td>2 beats</td>
+</tr>
+<tr>
+<td>LiveSnap_Four</td>
+<td>5</td>
+<td>4 beats</td>
+</tr>
+<tr>
+<td>LiveSnap_Auto</td>
+<td>6</td>
+<td>Auto</td>
+</tr>
+</tbody></table>
+<h4 id="triggerLiveClipFlags">Trigger live clip flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>TLC_MuteOthers</td>
+<td>1</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_Fill</td>
+<td>2</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_Queue</td>
+<td>4</td>
+<td>Queue mode</td>
+</tr>
+<tr>
+<td>TLC_Release</td>
+<td>32</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_NoPlayCheck</td>
+<td>64</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_NoHardwareUpdate</td>
+<td>1073741824</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_SecondPass</td>
+<td>2147483648</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_ColumnMode</td>
+<td>128</td>
+<td>Scene mode</td>
+</tr>
+<tr>
+<td>TLC_WeakColumnMode</td>
+<td>256</td>
+<td>+ Scene mode</td>
+</tr>
+<tr>
+<td>TLC_TriggerCheckColumnMode</td>
+<td>512</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_TrackSnap</td>
+<td>0</td>
+<td>Use performance mode track setting trigger snap</td>
+</tr>
+<tr>
+<td>TLC_GlobalSnap</td>
+<td>8</td>
+<td>Use FL global snap value as trigger snap</td>
+</tr>
+<tr>
+<td>TLC_NoSnap</td>
+<td>16</td>
+<td>Bypass all tigger snap</td>
+</tr>
+<tr>
+<td>TLC_SubNum_Normal</td>
+<td>0</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_SubNum_ClipPos</td>
+<td>65536</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_SubNum_GroupNum</td>
+<td>131072</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_SubNum_Read</td>
+<td>196608</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>TLC_SubNum_Leave</td>
+<td>262144</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+</tbody></table>
+<h4 id="RecEventParams">REC events</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>REC_Chan_Vol</td>
+<td>0</td>
+<td>Channel volume</td>
+</tr>
+<tr>
+<td>REC_Chan_Pan</td>
+<td>1</td>
+<td>Channel pan</td>
+</tr>
+<tr>
+<td>REC_Chan_FCut</td>
+<td>2</td>
+<td>Channel filter cutoff</td>
+</tr>
+<tr>
+<td>REC_Chan_FRes</td>
+<td>3</td>
+<td>Channel filter resonance</td>
+</tr>
+<tr>
+<td>REC_Chan_Pitch</td>
+<td>4</td>
+<td>Channel pitch</td>
+</tr>
+<tr>
+<td>REC_Chan_FType</td>
+<td>5</td>
+<td>Channel filter type</td>
+</tr>
+<tr>
+<td>REC_Chan_PortaTime</td>
+<td>6</td>
+<td>Channel portamento time</td>
+</tr>
+<tr>
+<td>REC_Chan_Mute</td>
+<td>7</td>
+<td>Channel mute</td>
+</tr>
+<tr>
+<td>REC_Chan_FXTrack</td>
+<td>8</td>
+<td>Chanel FX target</td>
+</tr>
+<tr>
+<td>REC_Chan_GateTime</td>
+<td>9</td>
+<td>Channel gate time</td>
+</tr>
+<tr>
+<td>REC_Chan_Crossfade</td>
+<td>10</td>
+<td>Channel crossfade</td>
+</tr>
+<tr>
+<td>REC_Chan_TimeOfs</td>
+<td>11</td>
+<td>Time offset</td>
+</tr>
+<tr>
+<td>REC_Chan_SwingMix</td>
+<td>12</td>
+<td>Swing mix</td>
+</tr>
+<tr>
+<td>REC_Chan_SmpOfs</td>
+<td>13</td>
+<td>Sample offset</td>
+</tr>
+<tr>
+<td>REC_Chan_StretchTime</td>
+<td>14</td>
+<td>Time stretch time</td>
+</tr>
+<tr>
+<td>REC_Chan_OfsPan</td>
+<td>16</td>
+<td>Levels adjustment pan</td>
+</tr>
+<tr>
+<td>REC_Chan_OfsVol</td>
+<td>17</td>
+<td>Levels adjustment volume</td>
+</tr>
+<tr>
+<td>REC_Chan_OfsPitch</td>
+<td>18</td>
+<td>Levels adjustment pitch</td>
+</tr>
+<tr>
+<td>REC_Chan_OfsFCut</td>
+<td>19</td>
+<td>Levels adjustment Mod X</td>
+</tr>
+<tr>
+<td>REC_Chan_OfsFRes</td>
+<td>20</td>
+<td>Levels adjustment Mod Y</td>
+</tr>
+</tbody></table>
+<p>use above parameters together with channel rec event id <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getRecEventId">getRecEventId</a><br>
+for example, to change volume for channel at 'index' use:<br>
+<i>midi.REC_Chan_Vol + channels.getRecEventId(index)</i></p>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>REC_Mixer_Vol</td>
+<td>536879040</td>
+<td>Mixer volume</td>
+</tr>
+<tr>
+<td>REC_Mixer_Pan</td>
+<td>536879041</td>
+<td>Mixer pan</td>
+</tr>
+<tr>
+<td>REC_Mixer_SS</td>
+<td>536879042</td>
+<td>Mixer stereo separation</td>
+</tr>
+<tr>
+<td>REC_Mixer_EQ_Gain</td>
+<td>536879056</td>
+<td>Mixer EQ gain</td>
+</tr>
+<tr>
+<td>REC_Mixer_EQ_Freq</td>
+<td>536879064</td>
+<td>Mixer freq</td>
+</tr>
+<tr>
+<td>REC_Mixer_EQ_Q</td>
+<td>536879072</td>
+<td>Mixer Q</td>
+</tr>
+<tr>
+<td>REC_Mixer_EQ_Type</td>
+<td>536879080</td>
+<td>Mixer type</td>
+</tr>
+</tbody></table>
+<p>use above parameters together with mixer track plugin id <a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm#getTrackPluginId">getTrackPluginId</a><br>
+for example, to change volume for mixer track at 'index' use:<br>
+<i>midi.REC_Mixer_Vol + mixer.getTrackPluginId(index, 0)</i></p>
+<h4 id="RecEventFlags">REC event flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>REC_UpdateValue</td>
+<td>1</td>
+<td>update the value</td>
+</tr>
+<tr>
+<td>REC_GetValue</td>
+<td>2</td>
+<td>retrieves the value</td>
+</tr>
+<tr>
+<td>REC_ShowHint</td>
+<td>4</td>
+<td>updates the hint (if any)</td>
+</tr>
+<tr>
+<td>REC_UpdatePlugLabel</td>
+<td>16</td>
+<td>updates the label for the plugin param</td>
+</tr>
+<tr>
+<td>REC_UpdateControl</td>
+<td>32</td>
+<td>updates the wheel/knob</td>
+</tr>
+<tr>
+<td>REC_FromMIDI</td>
+<td>64</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>REC_Store</td>
+<td>128</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>REC_SetChanged</td>
+<td>256</td>
+<td>set the changed flag</td>
+</tr>
+<tr>
+<td>REC_SetTouched</td>
+<td>512</td>
+<td>set as touched event</td>
+</tr>
+<tr>
+<td>REC_Init</td>
+<td>1024</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>REC_NoLink</td>
+<td>2048</td>
+<td>don't check if wheels are linked</td>
+</tr>
+<tr>
+<td>REC_InternalCtrl</td>
+<td>4096</td>
+<td>sent by an internal controller</td>
+</tr>
+<tr>
+<td>REC_PlugReserved</td>
+<td>8192</td>
+<td>free to use by plugins</td>
+</tr>
+<tr>
+<td>REC_Smoothed</td>
+<td>16384</td>
+<td>smoothed up controller, almost same as internal controller</td>
+</tr>
+<tr>
+<td>REC_NoLastTweaked</td>
+<td>32768</td>
+<td>coming from last tweaked</td>
+</tr>
+<tr>
+<td>REC_NoSaveUndo</td>
+<td>65536</td>
+<td>used when undoing a previous change</td>
+</tr>
+</tbody></table>
+<h4 id="stepParams">Step parameters</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>pPitch</td>
+<td>0</td>
+<td>update the value</td>
+</tr>
+<tr>
+<td>pVelocity</td>
+<td>1</td>
+<td>retrieves the value</td>
+</tr>
+<tr>
+<td>pRelease</td>
+<td>2</td>
+<td>updates the hint (if any)</td>
+</tr>
+<tr>
+<td>pFinePitch</td>
+<td>3</td>
+<td>updates the label for the plugin param</td>
+</tr>
+<tr>
+<td>pPan</td>
+<td>4</td>
+<td>updates the wheel/knob</td>
+</tr>
+<tr>
+<td>pModX</td>
+<td>5</td>
+<td>Per step Mod X value</td>
+</tr>
+<tr>
+<td>pModY</td>
+<td>6</td>
+<td>Per step Mod Y value</td>
+</tr>
+<tr>
+<td>pShift</td>
+<td>7</td>
+<td>set the changed flag</td>
+</tr>
+</tbody></table>
+<h4 id="globalTransportCommands">Global transport commnads</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>FPT_Jog</td>
+<td>0</td>
+<td>(jog) generic jog (can be used to select stuff)</td>
+</tr>
+<tr>
+<td>FPT_Jog2</td>
+<td>1</td>
+<td>(jog) alternate generic jog (can be used to relocate stuff)</td>
+</tr>
+<tr>
+<td>FPT_Strip</td>
+<td>2</td>
+<td>touch-sensitive jog strip, value will be in -midi.FromMIDI_Max..midi.FromMIDI_Max for
+leftmost..rightmost</td>
+</tr>
+<tr>
+<td>FPT_StripJog</td>
+<td>3</td>
+<td>(jog) touch-sensitive jog in jog mode</td>
+</tr>
+<tr>
+<td>FPT_StripHold</td>
+<td>4</td>
+<td>value will be 0 for release, 1,2 for 1,2 fingers centered mode, -1,-2 for 1,2
+fingers jog mode (will then send FPT_StripJog)</td>
+</tr>
+<tr>
+<td>FPT_Previous</td>
+<td>5</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Next</td>
+<td>6</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_PreviousNext</td>
+<td>7</td>
+<td>(jog) generic track selection</td>
+</tr>
+<tr>
+<td>FPT_MoveJog</td>
+<td>8</td>
+<td>(jog) used to relocate items</td>
+</tr>
+<tr>
+<td>FPT_Play</td>
+<td>10</td>
+<td>(button) play/pause</td>
+</tr>
+<tr>
+<td>FPT_Stop</td>
+<td>11</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Record</td>
+<td>12</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Rewind</td>
+<td>13</td>
+<td>(hold) perform rewind, set value to SS_Start to start, set to SS_Stop to stop</td>
+</tr>
+<tr>
+<td>FPT_FastForward</td>
+<td>14</td>
+<td>(hold) perform move forward, set value to SS_Start to start, set to SS_Stop to stop</td>
+</tr>
+<tr>
+<td>FPT_Loop</td>
+<td>15</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Mute</td>
+<td>16</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Mode</td>
+<td>17</td>
+<td>(button) generic | record mode</td>
+</tr>
+<tr>
+<td></td>
+</tr>
+<tr>
+<td>FPT_Undo</td>
+<td>20</td>
+<td>(button) undo/redo last, | undo down in history</td>
+</tr>
+<tr>
+<td>FPT_UndoUp</td>
+<td>21</td>
+<td>(button) undo up in history (no need to implement if no undo history)</td>
+</tr>
+<tr>
+<td>FPT_UndoJog</td>
+<td>22</td>
+<td>(jog) undo in history (no need to implement if no undo history)</td>
+</tr>
+<tr>
+<td>FPT_Punch</td>
+<td>30</td>
+<td>(hold) live selection</td>
+</tr>
+<tr>
+<td>FPT_PunchIn</td>
+<td>31</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_PunchOut</td>
+<td>32</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_AddMarker</td>
+<td>33</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_AddAltMarker</td>
+<td>34</td>
+<td>(button) add alternate marker</td>
+</tr>
+<tr>
+<td>FPT_MarkerJumpJog</td>
+<td>35</td>
+<td>(jog) marker jump</td>
+</tr>
+<tr>
+<td>FPT_MarkerSelJog</td>
+<td>36</td>
+<td>(jog) marker selection</td>
+</tr>
+<tr>
+<td>FPT_Up</td>
+<td>40</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Down</td>
+<td>41</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Left</td>
+<td>42</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Right</td>
+<td>43</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_HZoomJog</td>
+<td>44</td>
+<td>(jog) change horizontal zoom in active window (playlist/piano roll) or
+increase/decrease font size (browser)</td>
+</tr>
+<tr>
+<td>FPT_VZoomJog</td>
+<td>45</td>
+<td>(jog) change vertical zoom in active window (playlist/piano roll) or
+increase/decrease font size (browser)</td>
+</tr>
+<tr>
+<td>FPT_Snap</td>
+<td>48</td>
+<td>(button) snap on/off</td>
+</tr>
+<tr>
+<td>FPT_SnapMode</td>
+<td>49</td>
+<td>(jog) snap mode</td>
+</tr>
+<tr>
+<td>FPT_Cut</td>
+<td>50</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Copy</td>
+<td>51</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Paste</td>
+<td>52</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Insert</td>
+<td>53</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_Delete</td>
+<td>54</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_NextWindow</td>
+<td>58</td>
+<td>(button) TAB</td>
+</tr>
+<tr>
+<td>FPT_WindowJog</td>
+<td>59</td>
+<td>(jog) window selection</td>
+</tr>
+<tr>
+<td>FPT_F1</td>
+<td>60</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_F2</td>
+<td>61</td>
+<td>(button) Rename selected mixer track</td>
+</tr>
+<tr>
+<td>FPT_F3</td>
+<td>62</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_F4</td>
+<td>63</td>
+<td>(button) Next empty pattern with naming dialog</td>
+</tr>
+<tr>
+<td>FPT_F5</td>
+<td>64</td>
+<td>(button) Toggle Playlist</td>
+</tr>
+<tr>
+<td>FPT_F6</td>
+<td>65</td>
+<td>(button) Toggle Step Sequencer</td>
+</tr>
+<tr>
+<td>FPT_F7</td>
+<td>66</td>
+<td>(button) Toggle Piano roll</td>
+</tr>
+<tr>
+<td>FPT_F8</td>
+<td>67</td>
+<td>(button) Open Plugin Picker</td>
+</tr>
+<tr>
+<td>FPT_F9</td>
+<td>68</td>
+<td>(button) Show/hide Mixer</td>
+</tr>
+<tr>
+<td>FPT_F10</td>
+<td>69</td>
+<td>(button) Show/hide MIDI settings</td>
+</tr>
+<tr>
+<td>FPT_F11</td>
+<td>70</td>
+<td>(button) Show/hide song info window</td>
+</tr>
+<tr>
+<td>FPT_F12</td>
+<td>71</td>
+<td>(button) Executes the close all windows menu item</td>
+</tr>
+<tr>
+<td>FPT_Enter</td>
+<td>80</td>
+<td>(button) enter/accept</td>
+</tr>
+<tr>
+<td>FPT_Escape</td>
+<td>81</td>
+<td>(button) escape/cancel</td>
+</tr>
+<tr>
+<td>FPT_Yes</td>
+<td>82</td>
+<td>(button) yes</td>
+</tr>
+<tr>
+<td>FPT_No</td>
+<td>83</td>
+<td>(button) no</td>
+</tr>
+<tr>
+<td>FPT_Menu</td>
+<td>90</td>
+<td>(button) generic menu</td>
+</tr>
+<tr>
+<td>FPT_ItemMenu</td>
+<td>91</td>
+<td>(button) item edit/tool/contextual menu</td>
+</tr>
+<tr>
+<td>FPT_Save</td>
+<td>92</td>
+<td>(button)</td>
+</tr>
+<tr>
+<td>FPT_SaveNew</td>
+<td>93</td>
+<td>(button) save as new version</td>
+</tr>
+<tr>
+<td>FPT_PatternJog</td>
+<td>100</td>
+<td>(jog) pattern</td>
+</tr>
+<tr>
+<td>FPT_TrackJog</td>
+<td>101</td>
+<td>(jog) mixerr track</td>
+</tr>
+<tr>
+<td>FPT_ChannelJog</td>
+<td>102</td>
+<td>(jog) channel</td>
+</tr>
+<tr>
+<td>FPT_TempoJog</td>
+<td>105</td>
+<td>(jog) tempo (in 0.1BPM increments)</td>
+</tr>
+<tr>
+<td>FPT_TapTempo</td>
+<td>106</td>
+<td>(button) tempo tapping</td>
+</tr>
+<tr>
+<td>FPT_NudgeMinus</td>
+<td>107</td>
+<td>(hold) tempo nudge -</td>
+</tr>
+<tr>
+<td>FPT_NudgePlus</td>
+<td>108</td>
+<td>(hold) tempo nudge +</td>
+</tr>
+<tr>
+<td>FPT_Metronome</td>
+<td>110</td>
+<td>(button) metronome</td>
+</tr>
+<tr>
+<td>FPT_WaitForInput</td>
+<td>111</td>
+<td>(button) wait for input to start playing</td>
+</tr>
+<tr>
+<td>FPT_Overdub</td>
+<td>112</td>
+<td>(button) overdub recording</td>
+</tr>
+<tr>
+<td>FPT_LoopRecord</td>
+<td>113</td>
+<td>(button) loop recording</td>
+</tr>
+<tr>
+<td>FPT_StepEdit</td>
+<td>114</td>
+<td>(button) step edit mode</td>
+</tr>
+<tr>
+<td>FPT_CountDown</td>
+<td>115</td>
+<td>(button) countdown before recording</td>
+</tr>
+<tr>
+<td>FPT_NextMixerWindow</td>
+<td>120</td>
+<td>(button) tabs between plugin windows in the current mixer track</td>
+</tr>
+<tr>
+<td>FPT_MixerWindowJog</td>
+<td>121</td>
+<td>(jog) mixer window selection</td>
+</tr>
+<tr>
+<td>FPT_ShuffleJog</td>
+<td>122</td>
+<td>main shuffle (in increments of 1)</td>
+</tr>
+</tbody></table>
+<h4 id="globalTransportFlags">Global transport flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>GT_Cannot</td>
+<td>-1</td>
+<td>not handled</td>
+</tr>
+<tr>
+<td>GT_None</td>
+<td>0</td>
+<td>none</td>
+</tr>
+<tr>
+<td>GT_Plugin</td>
+<td>1</td>
+<td>(handled by) Focused plugin</td>
+</tr>
+<tr>
+<td>GT_Form</td>
+<td>2</td>
+<td>(handled by) Focused form</td>
+</tr>
+<tr>
+<td>GT_Menu</td>
+<td>4</td>
+<td>(handled by) Menu</td>
+</tr>
+<tr>
+<td>GT_Global</td>
+<td>8</td>
+<td>(handled) Globally</td>
+</tr>
+<tr>
+<td>GT_All</td>
+<td>15</td>
+<td>All</td>
+</tr>
+<tr>
+<td>GT_Delayed</td>
+<td>5</td>
+<td>Delayed handling (return value only)</td>
+</tr>
+</tbody></table>
+<h4 id="startStopConst">StartStop options</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>SS_Stop</td>
+<td>0</td>
+<td>Stop movement</td>
+</tr>
+<tr>
+<td>SS_StartStep</td>
+<td>1</td>
+<td>Start movement, but only when FL Studio is in step editing mode.</td>
+</tr>
+<tr>
+<td>SS_Start</td>
+<td>2</td>
+<td>Start movement.</td>
+</tr>
+</tbody></table>
+<h4 id="getSongLengthMode">Song length mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+ <th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>SONGLENGTH_MS</td>
+<td>0</td>
+<td>Length in ms</td>
+</tr>
+<tr>
+<td>SONGLENGTH_S</td>
+<td>1</td>
+<td>Length in s.</td>
+</tr>
+<tr>
+<td>SONGLENGTH_ABSTICKS</td>
+<td>2</td>
+<td>Length in absolute ticks</td>
+</tr>
+<tr>
+<td>SONGLENGTH_BARS</td>
+<td>3</td>
+<td>Length in BST format (bars part)</td>
+</tr>
+<tr>
+<td>SONGLENGTH_STEPS</td>
+<td>4</td>
+<td>Length in BST format (steps part)</td>
+</tr>
+<tr>
+<td>SONGLENGTH_TICKS</td>
+<td>5</td>
+<td>Length in BST format (ticks part)</td>
+</tr>
+</tbody></table>
+<h4 id="pmeFlags">PME flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>PME_System</td>
+<td>2</td>
+<td>Can do system stuff (play/pause.. mostly safe things)</td>
+</tr>
+<tr>
+<td>PME_System_Safe</td>
+<td>4</td>
+<td>Can do critical system stuff (add markers.. things that can't be done when a modal
+window is shown)</td>
+</tr>
+<tr>
+<td>PME_PreviewNote</td>
+<td>8</td>
+<td>note trigger previews notes | controls stuff</td>
+</tr>
+<tr>
+<td>PME_FromHost</td>
+<td>16</td>
+<td>when the app is hosted</td>
+</tr>
+<tr>
+<td>PME_FromMIDI</td>
+<td>32</td>
+<td>coming from MIDI event</td>
+</tr>
+</tbody></table>
+<h4 id="CurrentTrackFlags">Current track flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>curfxScrollToMakeVisible</td>
+<td>1</td>
+<td>Scroll to visible track</td>
+</tr>
+<tr>
+<td>curfxCancelSmoothing</td>
+<td>2</td>
+<td>Cancel smooting</td>
+</tr>
+<tr>
+<td>curfxNoDeselectAll</td>
+<td>4</td>
+<td>[todo] needs explanation</td>
+</tr>
+<tr>
+<td>curfxMinimalLatencyUpdate</td>
+<td>8</td>
+<td>[todo] needs explanation</td>
+</tr>
+</tbody></table>
+<h4 id="TrackInfoMode">Track info mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>TN_Master</td>
+<td>0</td>
+<td>Master</td>
+</tr>
+<tr>
+<td>TN_FirstIns</td>
+<td>1</td>
+<td>First insert</td>
+</tr>
+<tr>
+<td>TN_LastIns</td>
+<td>2</td>
+<td>Last insert</td>
+</tr>
+<tr>
+<td>TN_Sel</td>
+<td>3</td>
+<td>Selected</td>
+</tr>
+</tbody></table>
+<h4 id="IsIncrementFlags">IsIncrement flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>II_Absolute</td>
+<td>0</td>
+<td>Absolute</td>
+</tr>
+<tr>
+<td>II_Increment</td>
+<td>1</td>
+<td>Increement</td>
+</tr>
+<tr>
+<td>II_Switch</td>
+<td>2</td>
+<td>Switch</td>
+</tr>
+</tbody></table>
+<h4 id="openEventEditorMode">Open event editor modes</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>EE_EE</td>
+<td>0</td>
+<td>Controller editor</td>
+</tr>
+<tr>
+<td>EE_PR</td>
+<td>1</td>
+<td>Piano Roll</td>
+</tr>
+<tr>
+<td>EE_PL</td>
+<td>2</td>
+<td>Playlist</td>
+</tr>
+</tbody></table>
+<h4 id="TrackPeakMode">Track peaks mode</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>PEAK_L</td>
+<td>0</td>
+<td>Current peak for the left channel</td>
+</tr>
+<tr>
+<td>PEAK_R</td>
+<td>1</td>
+<td>Current peak for the right channel</td>
+</tr>
+<tr>
+<td>PEAK_LR</td>
+<td>2</td>
+<td>Current maximum peak of the peaks from left and right channel</td>
+</tr>
+<tr>
+<td>PEAK_L_INV</td>
+<td>0</td>
+<td>Current peak for the left channel (inverted)</td>
+</tr>
+<tr>
+<td>PEAK_R_INV</td>
+<td>1</td>
+<td>Current peak for the right channel (inverted)</td>
+</tr>
+<tr>
+<td>PEAK_LR_INV</td>
+<td>3</td>
+<td>Current maximum peak of the peaks from left and right channel (inverted)</td>
+</tr>
+</tbody></table>
+<h4 id="SongTickPosFlags">Song tick modes</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>ST_Int</td>
+<td>0</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>ST_Beat</td>
+<td>1</td>
+<td>Beat</td>
+</tr>
+<tr>
+<td>ST_PGB</td>
+<td>2</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+</tbody></table>
+<h4 id="LinkedInfoResultFlags">Get linked info result flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>Event_CantInterpolate</td>
+<td>1</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>Event_Float</td>
+<td>2</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+<tr>
+<td>Event_Centered</td>
+<td>4</td>
+<td>(TODO: needs explanation)</td>
+</tr>
+</tbody></table>
+<h4 id="FindEmptyPathFlags">Find empty paths flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>FFNEP_FindFirst</td>
+<td>0</td>
+<td>Find first pattern</td>
+</tr>
+<tr>
+<td>FFNEP_DontPromptName</td>
+<td>1</td>
+<td>Don't prompt pattern name</td>
+</tr>
+</tbody></table>
+<h4 id="saveUndoFlags">Save undo flags</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>UF_None</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>UF_EE</td>
+<td>1</td>
+<td>Event editor</td>
+</tr>
+<tr>
+<td>UF_PR</td>
+<td>2</td>
+<td>Piano roll</td>
+</tr>
+<tr>
+<td>UF_PL</td>
+<td>4</td>
+<td>Playlist</td>
+</tr>
+<tr>
+<td>UF_EEPR</td>
+<td>3</td>
+<td>Event editor + piano roll</td>
+</tr>
+<tr>
+<td>UF_KNOB</td>
+<td>32</td>
+<td>Automated control</td>
+</tr>
+<tr>
+<td>UF_AudioRec</td>
+<td>256</td>
+<td>Audio recording</td>
+</tr>
+<tr>
+<td>UF_AutoClip</td>
+<td>512</td>
+<td>Automation clip</td>
+</tr>
+<tr>
+<td>UF_PRMarker</td>
+<td>1024</td>
+<td>Pattern marker</td>
+</tr>
+<tr>
+<td>UF_PLMarker</td>
+<td>2048</td>
+<td>Playlist marker</td>
+</tr>
+<tr>
+<td>UF_Plugin</td>
+<td>4096</td>
+<td>Plugin</td>
+</tr>
+<tr>
+<td>UF_SSLooping</td>
+<td>8192</td>
+<td>Step Sequencer looping</td>
+</tr>
+<tr>
+<td>UF_Reset</td>
+<td>65536</td>
+<td>Reset undo history</td>
+</tr>
+</tbody></table>
+<h4 id="FLWindowConstants">FL window constants</h4>
+<table class="tableList">
+<tbody><tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Documentation</th>
+</tr>
+<tr>
+<td>widMixer</td>
+<td>0</td>
+<td>Mixer</td>
+</tr>
+<tr>
+<td>widChannelRack</td>
+<td>1</td>
+<td>Channel rack</td>
+</tr>
+<tr>
+<td>widPlaylist</td>
+<td>2</td>
+<td>Playlist</td>
+</tr>
+<tr>
+<td>widPianoRoll</td>
+<td>3</td>
+<td>Piano roll</td>
+</tr>
+<tr>
+<td>widBrowser</td>
+<td>4</td>
+<td>Browser</td>
+</tr>
+<tr>
+<td>widPlugin</td>
+<td>5</td>
+<td>Plugin window (only available inside getFocused function)</td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+
+
+</body></html>
